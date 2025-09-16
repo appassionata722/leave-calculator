@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>可休天數計算器</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .calculator-container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        .info-box {
+            background-color: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+        .info-box p {
+            margin: 0;
+            color: #1a237e;
+            font-size: 14px;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+        }
+        input[type="date"], input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result-box {
+            background-color: #e8f5e9;
+            border-left: 4px solid #4CAF50;
+            padding: 20px;
+            border-radius: 6px;
+            margin-top: 25px;
+        }
+        .result-box p {
+            margin: 0;
+            line-height: 1.8;
+            color: #1b5e20;
+        }
+        .result-box strong {
+            color: #388e3c;
+        }
+        .formula {
+            font-size: 14px;
+            color: #666;
+            margin-top: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="calculator-container">
+    <h1>可休天數計算器</h1>
+
+    <div class="info-box">
+        <p>當前週期：<strong id="cycleDatesDisplay"></strong></p>
+    </div>
+
+    <div class="input-group">
+        <label for="employeeStartDate">請選擇員工到職日期：</label>
+        <input type="date" id="employeeStartDate">
+    </div>
+
+    <div class="input-group">
+        <label for="holidays">本週期內國定假日天數：</label>
+        <input type="number" id="holidays" value="0">
+    </div>
+
+    <button id="calculateBtn">計算</button>
+
+    <div class="result-box" style="display:none;">
+        <p>週期在職天數：<strong><span id="employmentDays"></span> 天</strong></p>
+        <p>可休天數：<strong><span id="finalResult"></span> 天</strong></p>
+    </div>
+
+    <p class="formula">公式說明：週期在職天數 ÷ 週期天數 × 週期休假天數 (四捨五入)</p>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // 使用者提供的基準日期
+        const firstCycleStart = new Date('2025-09-02');
+        const cycleDuration = 28; // 固定四周週期天數
+        const cycleVacation = 8; // 固定週期休假天數
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        let currentCycleStart, currentCycleEnd;
+
+        // 根據今天的日期，自動計算當前週期
+        const diffInTime = today.getTime() - firstCycleStart.getTime();
+        const diffInDays = Math.floor(diffInTime / (1000 * 3600 * 24));
+        const cycleIndex = Math.floor(diffInDays / cycleDuration);
+
+        currentCycleStart = new Date(firstCycleStart);
+        currentCycleStart.setDate(firstCycleStart.getDate() + (cycleIndex * cycleDuration));
+        
+        currentCycleEnd = new Date(currentCycleStart);
+        currentCycleEnd.setDate(currentCycleStart.getDate() + cycleDuration - 1);
+
+        // 格式化日期顯示
+        const formatCycleDates = (start, end) => {
+            const startMonth = (start.getMonth() + 1).toString().padStart(2, '0');
+            const startDay = start.getDate().toString().padStart(2, '0');
+            const endMonth = (end.getMonth() + 1).toString().padStart(2, '0');
+            const endDay = end.getDate().toString().padStart(2, '0');
+            return `${start.getFullYear()}/${startMonth}/${startDay} - ${endMonth}/${endDay}`;
+        };
+        
+        document.getElementById('cycleDatesDisplay').innerText = formatCycleDates(currentCycleStart, currentCycleEnd);
+
+        // 計算邏輯
+        document.getElementById('calculateBtn').addEventListener('click', () => {
+            const employeeStartDateInput = document.getElementById('employeeStartDate').value;
+            const holidays = parseFloat(document.getElementById('holidays').value) || 0;
+
+            if (!employeeStartDateInput) {
+                alert('請選擇到職日期！');
+                return;
+            }
+
+            const employeeStartDate = new Date(employeeStartDateInput);
+            employeeStartDate.setHours(0, 0, 0, 0);
+
+            // 判斷在職天數
+            let employmentDays = 0;
+            // 如果到職日在當前週期開始日之前或當天
+            if (employeeStartDate <= currentCycleStart) {
+                employmentDays = cycleDuration;
+            } else {
+                // 如果到職日在當前週期內
+                const diffMs = currentCycleEnd.getTime() - employeeStartDate.getTime();
+                employmentDays = Math.floor(diffMs / (1000 * 3600 * 24)) + 1; // 包含到職當天
+            }
+            employmentDays = Math.max(0, employmentDays);
+
+            // 計算應得休假天數 (小數點後一位四捨五入)
+            const calculatedVacation = (employmentDays / cycleDuration) * cycleVacation;
+            const roundedVacation = Math.round(calculatedVacation * 10) / 10;
+            
+            // 最終總可休天數 (四捨五入成整數)
+            const finalResult = Math.round(roundedVacation + holidays);
+
+            // 顯示結果
+            document.getElementById('employmentDays').innerText = employmentDays;
+            document.getElementById('finalResult').innerText = finalResult;
+
+            document.querySelector('.result-box').style.display = 'block';
+        });
+    });
+</script>
+
+</body>
+</html>
