@@ -108,11 +108,6 @@
         <input type="date" id="employeeStartDate">
     </div>
 
-    <div class="input-group">
-        <label for="holidays">本週期內國定假日天數：</label>
-        <input type="number" id="holidays" value="0">
-    </div>
-
     <button id="calculateBtn">計算</button>
 
     <div class="result-box" style="display:none;">
@@ -121,6 +116,7 @@
     </div>
 
     <p class="formula">公式說明：週期在職天數 ÷ 週期天數 × 週期休假天數 (四捨五入)</p>
+<p class="formula" style="margin-top: 5px;">若到職日起算，剩餘的週期天數內遇有<span style="color: red;">國定假日</span>，再依國定假日的天數<span style="color: red;">加休</span></p>
 </div>
 
 <script>
@@ -152,7 +148,12 @@
             const startDay = start.getDate().toString().padStart(2, '0');
             const endMonth = (end.getMonth() + 1).toString().padStart(2, '0');
             const endDay = end.getDate().toString().padStart(2, '0');
-            return `${start.getFullYear()}/${startMonth}/${startDay} - ${endMonth}/${endDay}`;
+            // 處理跨年度顯示
+            if (start.getFullYear() !== end.getFullYear()) {
+                return `${start.getFullYear()}/${startMonth}/${startDay} - ${end.getFullYear()}/${endMonth}/${endDay}`;
+            } else {
+                return `${start.getFullYear()}/${startMonth}/${startDay} - ${endMonth}/${endDay}`;
+            }
         };
         
         document.getElementById('cycleDatesDisplay').innerText = formatCycleDates(currentCycleStart, currentCycleEnd);
@@ -160,8 +161,7 @@
         // 計算邏輯
         document.getElementById('calculateBtn').addEventListener('click', () => {
             const employeeStartDateInput = document.getElementById('employeeStartDate').value;
-            const holidays = parseFloat(document.getElementById('holidays').value) || 0;
-
+            
             if (!employeeStartDateInput) {
                 alert('請選擇到職日期！');
                 return;
@@ -175,7 +175,11 @@
             // 如果到職日在當前週期開始日之前或當天
             if (employeeStartDate <= currentCycleStart) {
                 employmentDays = cycleDuration;
-            } else {
+            } else if (employeeStartDate > currentCycleEnd) {
+                 // 如果到職日晚於週期結束日，則在職天數為0
+                employmentDays = 0;
+            }
+            else {
                 // 如果到職日在當前週期內
                 const diffMs = currentCycleEnd.getTime() - employeeStartDate.getTime();
                 employmentDays = Math.floor(diffMs / (1000 * 3600 * 24)) + 1; // 包含到職當天
@@ -184,10 +188,9 @@
 
             // 計算應得休假天數 (小數點後一位四捨五入)
             const calculatedVacation = (employmentDays / cycleDuration) * cycleVacation;
-            const roundedVacation = Math.round(calculatedVacation * 10) / 10;
             
-            // 最終總可休天數 (四捨五入成整數)
-            const finalResult = Math.round(roundedVacation + holidays);
+            // 最終總可休天數 (直接將計算結果四捨五入成整數)
+            const finalResult = Math.round(calculatedVacation);
 
             // 顯示結果
             document.getElementById('employmentDays').innerText = employmentDays;
