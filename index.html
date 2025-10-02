@@ -3,95 +3,150 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>可休天數計算器</title>
+    <title>可休天數計算器 (美化版)</title>
     <style>
+        /* 引入一個更美觀的 Google Font 字體 (可選，但推薦) */
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
+
+        /* --- 全局樣式重置與設定 --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
-            background-color: #f0f2f5;
+            font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f4f7f9; /* 更柔和的背景色 */
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            margin: 0;
             padding: 20px;
         }
+
+        /* --- 主要計算器容器 --- */
         .calculator-container {
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 16px; /* 更大的圓角 */
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); /* 更柔和、更深的陰影 */
             width: 100%;
             max-width: 500px;
+            transition: all 0.3s ease;
         }
+
         h1 {
-            color: #333;
+            color: #2c3e50;
             text-align: center;
-            margin-bottom: 20px;
-            font-size: 24px;
+            margin-bottom: 25px;
+            font-size: 26px;
+            font-weight: 700;
         }
+
+        /* --- 資訊提示框 --- */
         .info-box {
-            background-color: #e3f2fd;
-            border-left: 4px solid #2196f3;
-            padding: 15px;
-            border-radius: 6px;
+            background-color: #eaf5ff;
+            border-left: 5px solid #3498db;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+
+        .info-box p, .info-box strong {
+            color: #2980b9;
+            font-size: 15px;
+        }
+
+        /* --- 輸入區域 --- */
+        .input-group {
             margin-bottom: 20px;
         }
-        .info-box p {
-            margin: 0;
-            color: #1a237e;
-            font-size: 14px;
-        }
-        .input-group {
-            margin-bottom: 15px;
-        }
-        label {
+
+        .input-group label {
             display: block;
             margin-bottom: 8px;
             color: #555;
-            font-weight: 600;
+            font-weight: 500;
+            font-size: 15px;
         }
-        input[type="date"], input[type="number"] {
+
+        .input-group input[type="date"] {
             width: 100%;
-            padding: 10px;
+            padding: 12px 15px;
             border: 1px solid #ccc;
-            border-radius: 6px;
-            box-sizing: border-box;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s, box-shadow 0.3s;
         }
-        button {
+        /* 輸入框被選中時的樣式 */
+        .input-group input[type="date"]:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+
+        /* --- 按鈕 --- */
+        #calculateBtn {
             width: 100%;
-            padding: 12px;
-            background-color: #4CAF50;
+            padding: 14px;
+            background: linear-gradient(45deg, #2ecc71, #28b463); /* 漸層背景 */
             color: white;
             border: none;
-            border-radius: 6px;
-            font-size: 16px;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 500;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: transform 0.2s, box-shadow 0.2s, background 0.3s;
+            box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
         }
-        button:hover {
-            background-color: #45a049;
+        /* 滑鼠懸停在按鈕上 */
+        #calculateBtn:hover {
+            transform: translateY(-2px); /* 輕微上浮 */
+            box-shadow: 0 6px 20px rgba(46, 204, 113, 0.4);
         }
+        /* 按下按鈕時 */
+        #calculateBtn:active {
+            transform: translateY(0);
+            box-shadow: 0 3px 10px rgba(46, 204, 113, 0.3);
+        }
+
+        /* --- 結果顯示框 --- */
         .result-box {
+            display: none; /* 預設隱藏 */
             background-color: #e8f5e9;
-            border-left: 4px solid #4CAF50;
-            padding: 20px;
-            border-radius: 6px;
-            margin-top: 25px;
+            border-left: 5px solid #2ecc71;
+            padding: 20px 25px;
+            border-radius: 8px;
+            margin-top: 30px;
         }
+        
         .result-box p {
             margin: 0;
-            line-height: 1.8;
-            color: #1b5e20;
+            line-height: 2; /* 增加行高，更易讀 */
+            color: #1e8449;
+            font-size: 16px;
         }
+
         .result-box strong {
-            color: #388e3c;
+            color: #145a32;
+            font-weight: 700;
         }
+
+        /* --- 公式說明文字 --- */
         .formula {
-            font-size: 14px;
-            color: #666;
+            font-size: 13px;
+            color: #7f8c8d;
             margin-top: 20px;
             text-align: center;
+            line-height: 1.6;
         }
+        
+        .formula span {
+            font-size: 12px;
+            color: #95a5a6;
+        }
+
     </style>
 </head>
 <body>
@@ -110,102 +165,114 @@
 
     <button id="calculateBtn">計算</button>
 
-    <div class="result-box" style="display:none;">
+    <div class="result-box">
         <p>週期剩餘天數：<strong><span id="employmentDays"></span> 天</strong></p>
-        <p>可休天數：<strong><span id="finalResult"></span> 天</strong></p>
+        <p>基本可休天數：<strong><span id="calculatedVacation"></span> 天</strong></p>
+        <p>週期內國定假日加休：<strong><span id="holidayDays"></span> 天</strong></p>
+        <p>可休總天數：<strong id="finalResult"></strong></p>
     </div>
-
-<p class="formula">註：可休天數<span style="color: red;">不含</span>國定假日</p>    
-<p class="formula" style="margin-top: 5px;">從到職日起算，若目前週期剩餘的天數內<span style="color: red;">遇有國定假日</span>，需計入國定假日的天數<span style="color: red;">加休</span></p>
-<p class="formula">公式說明：週期剩餘天數(含到職日) ÷ 週期天數 × 8 (週期應休天數，計算結果四捨五入至整數)</p>
+    
+    <p class="formula">公式說明：基本可休天數 = (週期剩餘天數(含到職日) ÷ 週期天數 × 8) <br> <span>(計算結果四捨五入至整數)</span></p>
+    <p class="formula" style="margin-top: 5px;">總天數 = 基本可休天數 + 週期內國定假日天數</p>
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        // 使用者提供的基準日期
-        const firstCycleStart = new Date('2025-09-02');
-        const cycleDuration = 28; // 固定四周週期天數
-        const cycleVacation = 8; // 固定週期休假天數
+     document.addEventListener('DOMContentLoaded', () => {
+         const firstCycleStart = new Date('2025-09-02');
+         const cycleDuration = 28;
+         const cycleVacation = 8;
 
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+         const FIXED_HOLIDAYS = [
+             '2025-01-01', '2025-01-27', '2025-01-28', '2025-01-29', '2025-01-30', '2025-01-31',
+             '2025-02-28', '2025-04-04', '2025-05-01', '2025-05-30', '2025-10-06', '2025-10-10',
+             '2025-10-25', '2025-12-25', '2026-01-01', '2026-02-15', '2026-02-16', '2026-02-17',
+             '2026-02-18', '2026-02-19', '2026-02-28', '2026-04-04', '2026-04-05', '2026-05-01',
+             '2026-06-19', '2026-09-25', '2026-10-10', '2026-10-25', '2026-12-25'
+         ];
 
-        let currentCycleStart, currentCycleEnd;
+         const holidayTimestamps = FIXED_HOLIDAYS
+             .map(dateStr => {
+                 const date = new Date(dateStr);
+                 return isNaN(date.getTime()) ? null : date.setHours(0, 0, 0, 0);
+             })
+             .filter(timestamp => timestamp !== null);
+         
+         const today = new Date();
+         today.setHours(0, 0, 0, 0);
 
-        // 根據今天的日期，自動計算當前週期
-        const diffInTime = today.getTime() - firstCycleStart.getTime();
-        const diffInDays = Math.floor(diffInTime / (1000 * 3600 * 24));
-        const cycleIndex = Math.floor(diffInDays / cycleDuration);
+         let currentCycleStart, currentCycleEnd;
+         const diffInTime = today.getTime() - firstCycleStart.getTime();
+         const diffInDays = Math.floor(diffInTime / (1000 * 3600 * 24));
+         const cycleIndex = Math.floor(diffInDays / cycleDuration);
 
-        currentCycleStart = new Date(firstCycleStart);
-        currentCycleStart.setDate(firstCycleStart.getDate() + (cycleIndex * cycleDuration));
-        
-        currentCycleEnd = new Date(currentCycleStart);
-        currentCycleEnd.setDate(currentCycleStart.getDate() + cycleDuration - 1);
+         currentCycleStart = new Date(firstCycleStart);
+         currentCycleStart.setDate(firstCycleStart.getDate() + (cycleIndex * cycleDuration));
+         
+         currentCycleEnd = new Date(currentCycleStart);
+         currentCycleEnd.setDate(currentCycleStart.getDate() + cycleDuration - 1);
 
-        // 格式化日期顯示
-        const formatCycleDates = (start, end) => {
-            const startMonth = (start.getMonth() + 1).toString().padStart(2, '0');
-            const startDay = start.getDate().toString().padStart(2, '0');
-            const endMonth = (end.getMonth() + 1).toString().padStart(2, '0');
-            const endDay = end.getDate().toString().padStart(2, '0');
-            // 處理跨年度顯示
-            if (start.getFullYear() !== end.getFullYear()) {
-                return `${start.getFullYear()}/${startMonth}/${startDay} - ${end.getFullYear()}/${endMonth}/${endDay}`;
-            } else {
-                return `${start.getFullYear()}/${startMonth}/${startDay} - ${endMonth}/${endDay}`;
-            }
-        };
-        
-        document.getElementById('cycleDatesDisplay').innerText = formatCycleDates(currentCycleStart, currentCycleEnd);
+         const formatCycleDates = (start, end) => {
+             const startYear = start.getFullYear();
+             const startMonth = (start.getMonth() + 1).toString().padStart(2, '0');
+             const startDay = start.getDate().toString().padStart(2, '0');
+             const endMonth = (end.getMonth() + 1).toString().padStart(2, '0');
+             const endDay = end.getDate().toString().padStart(2, '0');
+             return `${startYear}/${startMonth}/${startDay} - ${endMonth}/${endDay}`;
+         };
+         
+         document.getElementById('cycleDatesDisplay').innerText = formatCycleDates(currentCycleStart, currentCycleEnd);
 
-        // 計算邏輯
-        document.getElementById('calculateBtn').addEventListener('click', () => {
-            const employeeStartDateInput = document.getElementById('employeeStartDate').value;
-            
-            if (!employeeStartDateInput) {
-                alert('請選擇到職日期！');
-                return;
-            }
+         document.getElementById('calculateBtn').addEventListener('click', () => {
+             const employeeStartDateInput = document.getElementById('employeeStartDate').value;
+             
+             if (!employeeStartDateInput) {
+                 alert('請選擇到職日期！');
+                 return;
+             }
 
-            const employeeStartDate = new Date(employeeStartDateInput);
-            employeeStartDate.setHours(0, 0, 0, 0);
+             const employeeStartDate = new Date(employeeStartDateInput);
+             employeeStartDate.setHours(0, 0, 0, 0);
 
-            // 判斷在職天數
-            let employmentDays = 0;
-            // 如果到職日在當前週期開始日之前或當天
-            if (employeeStartDate <= currentCycleStart) {
-                employmentDays = cycleDuration;
-            } else if (employeeStartDate > currentCycleEnd) {
-                 // 如果到職日晚於週期結束日，則在職天數為0
-                employmentDays = 0;
-            }
-            else {
-                // 如果到職日在當前週期內
-                const diffMs = currentCycleEnd.getTime() - employeeStartDate.getTime();
-                employmentDays = Math.floor(diffMs / (1000 * 3600 * 24)) + 1; // 包含到職當天
-            }
-            employmentDays = Math.max(0, employmentDays);
+             let employmentDays = 0;
+             if (employeeStartDate <= currentCycleStart) {
+                 employmentDays = cycleDuration;
+             } else if (employeeStartDate > currentCycleEnd) {
+                 employmentDays = 0;
+             } else {
+                 const diffMs = currentCycleEnd.getTime() - employeeStartDate.getTime();
+                 employmentDays = Math.floor(diffMs / (1000 * 3600 * 24)) + 1;
+             }
+             employmentDays = Math.max(0, employmentDays);
 
-            // 計算應得休假天數 (小數點後一位四捨五入)
-            const calculatedVacation = (employmentDays / cycleDuration) * cycleVacation;
-            
-            // 最終總可休天數 (直接將計算結果四捨五入成整數)
-            const finalResult = Math.round(calculatedVacation);
+             const calculatedVacation = (employmentDays / cycleDuration) * cycleVacation;
+             const baseVacationResult = Math.round(calculatedVacation);
 
-            // 顯示結果
-            document.getElementById('employmentDays').innerText = employmentDays;
-            document.getElementById('finalResult').innerText = finalResult;
+             let holidayDays = 0;
+             const startCheckDateTimestamp = (employeeStartDate > currentCycleStart ? employeeStartDate : currentCycleStart).getTime();
+             const endCycleTimestamp = currentCycleEnd.getTime();
+             
+             if (employmentDays > 0) {
+                 holidayTimestamps.forEach(holidayTimestamp => {
+                     if (holidayTimestamp >= startCheckDateTimestamp && holidayTimestamp <= endCycleTimestamp) {
+                         holidayDays += 1;
+                     }
+                 });
+             }
 
-            document.querySelector('.result-box').style.display = 'block';
-        });
-    });
+             document.getElementById('employmentDays').innerText = employmentDays;
+             document.getElementById('calculatedVacation').innerText = baseVacationResult;
+             document.getElementById('holidayDays').innerText = holidayDays;
+
+             if (holidayDays > 0) {
+                 document.getElementById('finalResult').innerHTML = `${baseVacationResult}天 + ${holidayDays}天`;
+             } else {
+                 document.getElementById('finalResult').innerHTML = `${baseVacationResult}天`;
+             }
+
+             document.querySelector('.result-box').style.display = 'block';
+         });
+     });
 </script>
 
 </body>
 </html>
-
-
-
-
-
